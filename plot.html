@@ -1,222 +1,288 @@
 <!DOCTYPE html>
 <html lang="pt">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>História da Mineração no Brasil</title>
 
-    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>História da Mineração no Brasil</title>
 
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        text-align: center;
-      }
-      #controls {
-        margin: 20px;
-      }
-      #map {
-        width: 90%;
-        height: 600px;
-        margin: auto;
-      }
-    </style>
-  </head>
-  <body>
-    <h2>História da Mineração no Brasil</h2>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-    <div id="controls">
-      <label for="categoryFilter">Filtrar por categoria:</label>
-      <select id="categoryFilter">
-        <option value="TODAS">Todas</option>
-      </select>
-    </div>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
 
-    <div id="map"></div>
+    #controls {
+      margin: 20px;
+    }
 
-    <script>
-      $(function () {
-        const myChart = echarts.init(document.getElementById("map"));
-        myChart.showLoading();
+    #map {
+      width: 90%;
+      height: 600px;
+      margin: auto;
+    }
+  </style>
+</head>
 
-        const subsColors = {};
-        const allData = {};
+<body>
+  <h2>História da Mineração no Brasil</h2>
 
-        function getColor(subs) {
-          if (!subsColors[subs]) {
-            const hash = [...subs].reduce(
-              (acc, char) => acc + char.charCodeAt(0),
-              0
-            );
-            const hue = hash % 360;
-            subsColors[subs] = `hsl(${hue}, 70%, 50%)`;
-          }
-          return subsColors[subs];
+  <div id="controls">
+    <label for="categoryFilter">Filtrar por categoria:</label>
+    <select id="categoryFilter">
+      <option value="TODAS">Todas</option>
+    </select>
+  </div>
+
+  <div id="map"></div>
+
+  <script>
+    $(function () {
+      const myChart = echarts.init(document.getElementById("map"));
+      myChart.showLoading();
+
+      const subsColors = {};
+      const allData = {};
+      const colorMap = {
+        'DIAMANTE': '#C0F6FF',    // Azul claro translúcido
+        'ESMERALDA': '#50C878',   // Verde esmeralda
+        'RUBI': '#E0115F',        // Vermelho rubi
+        'SAFIRA': '#0F52BA',      // Azul safira
+        'TURMALINA': '#9C51B6',   // Roxo turmalina
+        'AMETISTA': '#9966CC',    // Lilás ametista
+        'TOPÁZIO': '#FFC87C',     // Amarelo topázio
+        'ALEXANDRITA': '#00FF9C', // Verde-azulado cambiante
+        'ÁGATA': '#B78727',       // Marrom-ágata
+        'OPALA': '#F7E6D0',       // Branco opalescente
+        'TURQUESA': '#40E0D0',    // Turquesa
+        'CHUMBO': '#3D3D3D',      // Cinza chumbo
+        'CROMO': '#7F7F7F',       // Cinza metálico
+        'CÁDMIO': '#FFD700',      // Dourado metálico
+        'ZINCO': '#BAC4C8',       // Cinza azulado
+        'MERCÚRIO': '#B5B5B5',    // Prata líquido
+        'OURO': '#FFD700',        // Dourado
+        'PRATA': '#C0C0C0',       // Prata
+        'PLATINA': '#E5E4E2',     // Branco platina
+        'TUNGSTÊNIO': '#3A3A38',  // Cinza escuro
+        'NÍQUEL': '#727279',      // Cinza níquel
+        'ALUMÍNIO': '#848789',    // Cinza alumínio
+        'FERRO': '#595959',       // Cinza ferro
+        'COBRE': '#B87333',       // Laranja cobre
+        'MANGANÊS': '#8B6C42',    // Marrom manganês
+        'TITÂNIO': '#878681',     // Cinza titânio
+        'ESTANHO': '#808080',     // Cinza estanho
+        'LÍTIO': '#CCCCCC',       // Cinza claro
+        'NIÓBIO': '#8A9597',      // Cinza azulado
+        'QUARTZO': '#E2D5CF',     // Branco quartzo
+        'FELDSPATO': '#FEFEEC',   // Branco perolado
+        'TALCO': '#F0F0F0',       // Branco talco
+        'GRAFITA': '#383838',     // Preto grafite
+        'CAULIM': '#F4F0EC',      // Branco caulim
+        'MICA': '#D8CFC1',        // Dourado nacarado
+        'ENXOFRE': '#FFFF33',     // Amarelo enxofre
+        'GIPSITA': '#F1EAD7',     // Branco gesso
+        'BARITA': '#9E9E9E',      // Cinza barita
+        'FLUORITA': '#6ECFF6',    // Azul fluorita
+        'GRANITO': '#756C5E',     // Cinza granito
+        'MÁRMORE': '#E3D9C6',     // Branco mármore
+        'BASALTO': '#4A4847',     // Preto basalto
+        'ARDÓSIA': '#5A5A5A',     // Cinza ardósia
+        'ARENITO': '#C2B280',     // Bege arenito
+        'GNAISSE': '#7A7564',     // Cinza gnaisse
+        'CALCÁRIO': '#EDEADE',    // Branco calcário
+        'CARVÃO': '#1A1A1A',      // Preto carvão
+        'URÂNIO': '#008F00',      // Verde urânio
+        'FOSFATO': '#A3A3A3',     // Cinza fosfato
+        'SÍLICA': '#D3D3D3',      // Cinza sílica
+        'BORATOS': '#E6D3A3',     // Bege boratos
+        'MAGNÉSIO': '#A9A9A9',    // Cinza magnésio
+        'AREIA': '#F4D03F',       // Amarelo areia
+        'ARGILA': '#A0522D',      // Marrom argila
+        'CASCALHO': '#B8A98E',    // Bege cascalho
+        'SAIBRO': '#8B7355',      // Marrom saibro
+        'ÁGUA MINERAL': '#0099FF' // Azul água
+      };
+
+      function getColor(subs) {
+        const upperSubs = subs.toUpperCase();
+        if (colorMap[upperSubs]) {
+          return colorMap[upperSubs];
         }
 
-        function updateChart(categoryFilter) {
-          const sortedYears = Object.keys(allData);
-          const options = sortedYears.map((year) => {
-            const yearData = allData[year] || {};
-            const subsSeries = [];
+        if (!subsColors[upperSubs]) {
+          const hash = [...upperSubs].reduce((acc, char) => acc + char.charCodeAt(0), 0);
+          const hue = hash % 360;
+          subsColors[upperSubs] = `hsl(${hue}, 70%, 50%)`;
+        }
+        return subsColors[upperSubs];
+      }
 
-            for (const [subs, entries] of Object.entries(yearData)) {
-              const filtered =
-                categoryFilter === "TODAS"
-                  ? entries
-                  : entries.filter((d) => d.categoria === categoryFilter);
+      function updateChart(categoryFilter) {
+        const sortedYears = Object.keys(allData);
+        const options = sortedYears.map((year) => {
+          const yearData = allData[year] || {};
+          const subsSeries = [];
 
-              if (filtered.length > 0) {
-                subsSeries.push({
-                  name: subs,
-                  type: "scatter",
-                  coordinateSystem: "geo",
-                  data: filtered,
-                  symbolSize: (val) => Math.sqrt(val[2]) * 0.3 + 2,
-                  itemStyle: {
-                    color: getColor(subs),
-                  },
-                  emphasis: {
-                    scale: true,
-                  },
-                });
-              }
-            }
+          for (const [subs, entries] of Object.entries(yearData)) {
+            const filtered =
+              categoryFilter === "TODAS"
+                ? entries
+                : entries.filter((d) => d.categoria === categoryFilter);
 
-            return {
-              title: {
-                text: `Mineração no Brasil - ${year}`,
-                left: "center",
-              },
-              series: subsSeries,
-            };
-          });
-
-          const finalOption = {
-            baseOption: {
-              timeline: {
-                axisType: "category",
-                autoPlay: true,
-                playInterval: 3000,
-                data: sortedYears,
-                label: {
-                  formatter: (s) => s,
+            if (filtered.length > 0) {
+              subsSeries.push({
+                name: subs,
+                type: "scatter",
+                coordinateSystem: "geo",
+                data: filtered,
+                symbolSize: (val) => Math.sqrt(val[2]) * 0.3 + 2,
+                itemStyle: {
+                  color: getColor(subs),
                 },
+                emphasis: {
+                  scale: true,
+                },
+              });
+            }
+          }
+
+          return {
+            title: {
+              text: `Mineração no Brasil - ${year}`,
+              left: "center",
+            },
+            series: subsSeries,
+          };
+        });
+
+        const finalOption = {
+          baseOption: {
+            timeline: {
+              axisType: "category",
+              autoPlay: true,
+              playInterval: 3000,
+              data: sortedYears,
+              label: {
+                formatter: (s) => s,
               },
-              tooltip: {
-                trigger: "item",
-                formatter: (params) => {
-                  return `
+            },
+            tooltip: {
+              trigger: "item",
+              formatter: (params) => {
+                return `
                     Substância: ${params.seriesName}<br/>
                     Área: ${params.value[2]} ha<br/>
                     Extrator: ${params.value[3]}
                   `;
-                },
               },
-              geo: {
-                map: "Brazil",
-                roam: true,
-                scaleLimit: {
-                  min: 1,
-                  max: 10,
-                },
-                emphasis: {
-                  label: {
-                    show: false,
-                  },
-                },
-              },
-              legend: {
-                orient: "vertical",
-                right: 10,
-                top: "middle",
-                textStyle: {
-                  fontSize: 12,
-                },
-              },
-              series: [],
             },
-            options: options,
-          };
+            geo: {
+              map: "Brazil",
+              roam: true,
+              scaleLimit: {
+                min: 1,
+                max: 10,
+              },
+              emphasis: {
+                label: {
+                  show: false,
+                },
+              },
+            },
+            legend: {
+              orient: "vertical",
+              right: 10,
+              top: "middle",
+              textStyle: {
+                fontSize: 12,
+              },
+            },
+            series: [],
+          },
+          options: options,
+        };
 
-          myChart.clear();
-          myChart.setOption(finalOption);
-        }
+        myChart.clear();
+        myChart.setOption(finalOption);
+      }
 
-        $.get(
-          "https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/brazil-states.geojson",
-          function (brazilJson) {
-            echarts.registerMap("Brazil", brazilJson);
-            myChart.hideLoading();
+      $.get(
+        "https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/brazil-states.geojson",
+        function (brazilJson) {
+          echarts.registerMap("Brazil", brazilJson);
+          myChart.hideLoading();
 
-            $.get(
-              "https://raw.githubusercontent.com/Jaovicttor/vdd-prova3/v1/df_vdd.csv",
-              function (csvData) {
-                const lines = csvData.split("\n");
-                const header = lines[0].split(",");
+          $.get(
+            "https://raw.githubusercontent.com/Jaovicttor/vdd-prova3/v1/df_vdd.csv",
+            function (csvData) {
+              const lines = csvData.split("\n");
+              const header = lines[0].split(",");
 
-                const yearIndex = header.indexOf("ANO");
-                const subsIndex = header.indexOf("SUBS");
-                const wktIndex = header.indexOf("WKT");
-                const areaIndex = header.indexOf("AREA_HA");
-                const catIndex = header.indexOf("CATEGORIA");
-                const companyIndex = header.indexOf("NOME");
+              const yearIndex = header.indexOf("ANO");
+              const subsIndex = header.indexOf("SUBS");
+              const wktIndex = header.indexOf("WKT");
+              const areaIndex = header.indexOf("AREA_HA");
+              const catIndex = header.indexOf("CATEGORIA");
+              const companyIndex = header.indexOf("NOME");
 
-                const categorySet = new Set();
+              const categorySet = new Set();
 
-                for (let i = 1; i < lines.length; i++) {
-                  const cols = lines[i].split(",");
-                  if (cols.length < 6) continue;
+              for (let i = 1; i < lines.length; i++) {
+                const cols = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.trim().replace(/^"|"$/g, ''));
+                if (cols.length < 6) continue;
 
-                  const subs = cols[subsIndex]?.trim().toUpperCase();
-                  const wkt = cols[wktIndex];
-                  const area = parseFloat(cols[areaIndex]) || 0;
-                  const year = cols[yearIndex]?.trim();
-                  const categoria = cols[catIndex]?.trim();
-                  const company = cols[companyIndex]?.trim();
-                  if (!year || !subs || !categoria) continue;
+                const subs = cols[subsIndex]?.trim().toUpperCase();
+                const wkt = cols[wktIndex];
+                const area = parseFloat(cols[areaIndex]) || 0;
+                const year = cols[yearIndex]?.trim();
+                const categoria = cols[catIndex]?.trim();
+                const company = cols[companyIndex]?.trim();
+                if (!year || !subs || !categoria) continue;
 
-                  const match = wkt.match(
-                    /POINT \((-?\d+\.\d+) (-?\d+\.\d+)\)/
-                  );
-                  if (match) {
-                    const longitude = parseFloat(match[1]);
-                    const latitude = parseFloat(match[2]);
+                const match = wkt.match(
+                  /POINT \((-?\d+\.\d+) (-?\d+\.\d+)\)/
+                );
+                if (match) {
+                  const longitude = parseFloat(match[1]);
+                  const latitude = parseFloat(match[2]);
 
-                    if (!allData[year]) allData[year] = {};
-                    if (!allData[year][subs]) allData[year][subs] = [];
+                  if (!allData[year]) allData[year] = {};
+                  if (!allData[year][subs]) allData[year][subs] = [];
 
-                    allData[year][subs].push({
-                      value: [longitude, latitude, area, company],
-                      categoria: categoria,
-                    });
+                  allData[year][subs].push({
+                    value: [longitude, latitude, area, company],
+                    categoria: categoria,
+                  });
 
-                    categorySet.add(categoria);
-                  }
+                  categorySet.add(categoria);
                 }
-
-                // Atualiza o seletor de categoria
-                const select = document.getElementById("categoryFilter");
-                categorySet.forEach((cat) => {
-                  const option = document.createElement("option");
-                  option.value = cat;
-                  option.textContent = cat;
-                  select.appendChild(option);
-                });
-
-                // Evento de filtro
-                select.addEventListener("change", (e) => {
-                  updateChart(e.target.value);
-                });
-
-                // Primeiro render
-                updateChart("TODAS");
               }
-            );
-          }
-        );
-      });
-    </script>
-  </body>
+
+              // Atualiza o seletor de categoria
+              const select = document.getElementById("categoryFilter");
+              categorySet.forEach((cat) => {
+                const option = document.createElement("option");
+                option.value = cat;
+                option.textContent = cat;
+                select.appendChild(option);
+              });
+
+              // Evento de filtro
+              select.addEventListener("change", (e) => {
+                updateChart(e.target.value);
+              });
+
+              // Primeiro render
+              updateChart("TODAS");
+            }
+          );
+        }
+      );
+    });
+  </script>
+</body>
+
 </html>
